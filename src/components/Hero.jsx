@@ -28,7 +28,7 @@ export default function Hero() {
           />
         </div>
 
-        <h1 className="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight gradient-text mb-4">
+        <h1 className="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight uppercase gradient-text mb-4">
           {NAME}
         </h1>
 

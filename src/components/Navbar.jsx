@@ -28,7 +28,11 @@ export default function Navbar() {
     >
       <nav className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
         <a href="#top" className="font-heading font-bold text-lg tracking-tight gradient-text">
-          {NAME.split(".").filter(Boolean).map((p) => p[0]).join("")}
+          {NAME.split(/\s+/)
+            .filter(Boolean)
+            .map((p) => p[0])
+            .join("")
+            .toUpperCase()}
         </a>
 
         <ul className="hidden md:flex items-center gap-8 text-sm text-gray-300">

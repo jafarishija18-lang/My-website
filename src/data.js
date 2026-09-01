@@ -1,4 +1,4 @@
-export const NAME = "JAFFARY.J.SHIJA";
+export const NAME = "Jaffary J. Shija";
 
 export const ROLES = [
   "Data Analyst",
