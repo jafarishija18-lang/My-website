@@ -8,13 +8,25 @@
       name="description"
       content="Jaffary J. Shija — Full-Stack Engineer, Data Analyst, Graphics Designer, Database Admin, System Architect & Network Engineer. Portfolio of projects and skills."
     />
-    <meta name="theme-color" content="#080b14" />
+    <meta name="theme-color" content="#e9ecf6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1b1e30" media="(prefers-color-scheme: dark)" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap"
       rel="stylesheet"
     />
+    <!-- Apply the saved / system theme before first paint to avoid a flash -->
+    <script>
+      (function () {
+        var t;
+        try { t = localStorage.getItem("theme"); } catch (e) {}
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

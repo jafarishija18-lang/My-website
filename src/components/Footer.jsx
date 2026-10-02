@@ -1,13 +1,16 @@
+import { Heart, Coffee } from "lucide-react";
 import { NAME } from "../data";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10 px-6 py-6">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-gray-500">
-        <p>© 2025 – {new Date().getFullYear()} {NAME}. Built with React.</p>
+    <footer className="px-4 pb-6">
+      <div className="clay-sm !rounded-[26px] max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-muted">
         <p>
-          Crafted with <span className="text-red-400">❤</span> and lots of{" "}
-          <span className="text-amber-500">☕</span>
+          © 2025 – {new Date().getFullYear()} <span className="font-semibold text-ink">{NAME}</span>. Built with React.
+        </p>
+        <p className="inline-flex items-center gap-1.5">
+          Crafted with <Heart size={15} className="text-pink fill-current animate-pulse" /> and lots of
+          <Coffee size={15} className="text-amber" />
         </p>
       </div>
     </footer>
