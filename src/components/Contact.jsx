@@ -72,6 +72,26 @@ export default function Contact() {
     setTimeout(() => setSent(false), 4000);
   };
 
+  // Force a file download instead of opening the PDF in a browser viewer:
+  // re-wrap it as a generic binary so no browser tries to display it.
+  const downloadResume = async (e) => {
+    e.preventDefault();
+    const filename = RESUME_URL.split("/").pop();
+    try {
+      const res = await fetch(RESUME_URL);
+      if (!res.ok) throw new Error(res.statusText);
+      const blob = new Blob([await res.arrayBuffer()], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = Object.assign(document.createElement("a"), { href: url, download: filename });
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      window.location.href = RESUME_URL; // last resort: let the browser handle it
+    }
+  };
+
   const scheduleHref =
     SCHEDULE_CALL_URL || `mailto:${CONTACT.email}?subject=${encodeURIComponent("Schedule a call")}`;
 
@@ -205,7 +225,7 @@ export default function Contact() {
               Download my resume or schedule a quick call to discuss your needs.
             </p>
             <div className="relative flex flex-wrap justify-center gap-4">
-              <a href={RESUME_URL} download className="btn bg-white !text-[#0f766e] shadow-[0_12px_24px_-8px_rgba(0,0,0,.3),inset_-3px_-3px_8px_rgba(0,0,0,.08)]">
+              <a href={RESUME_URL} download onClick={downloadResume} className="btn bg-white !text-[#0f766e] shadow-[0_12px_24px_-8px_rgba(0,0,0,.3),inset_-3px_-3px_8px_rgba(0,0,0,.08)]">
                 <Download size={17} className="btn-arrow" /> Download Resume
               </a>
               <a

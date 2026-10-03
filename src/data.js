@@ -52,5 +52,5 @@ export const CONTACT = {
 // to a mailto link instead.
 export const SCHEDULE_CALL_URL = "";
 
-// Drop your résumé PDF in /public and update this path.
-export const RESUME_URL = "/resume.pdf";
+// Résumé PDF served from /public; the Download Resume button saves it (never opens it).
+export const RESUME_URL = "/Jaffary_Shija_CV.pdf";

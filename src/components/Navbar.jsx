@@ -19,22 +19,26 @@ function ThemeToggle({ theme, onToggle }) {
   const dark = theme === "dark";
   return (
     <button
+      role="switch"
+      aria-checked={dark}
       onClick={onToggle}
-      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-      className="btn btn-soft !p-0 w-11 h-11 !rounded-full"
+      aria-label="Dark theme"
+      className="neu-switch shrink-0"
     >
-      <Sun
-        size={19}
-        className={`absolute text-amber transition-all duration-500 ${
-          dark ? "opacity-0 rotate-90 scale-50" : "opacity-100 rotate-0 scale-100"
-        }`}
-      />
-      <Moon
-        size={18}
-        className={`absolute text-violet transition-all duration-500 ${
-          dark ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-50"
-        }`}
-      />
+      <span className="neu-switch-knob">
+        <Sun
+          size={16}
+          className={`absolute text-amber transition-all duration-500 ${
+            dark ? "opacity-0 rotate-90 scale-50" : "opacity-100 rotate-0 scale-100"
+          }`}
+        />
+        <Moon
+          size={15}
+          className={`absolute text-violet transition-all duration-500 ${
+            dark ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-50"
+          }`}
+        />
+      </span>
     </button>
   );
 }
@@ -77,7 +81,7 @@ export default function Navbar() {
         style={{
           transitionTimingFunction: "var(--ease-out)",
           background: scrolled || open ? "var(--nav-bg)" : "transparent",
-          boxShadow: scrolled || open ? "var(--clay-sm)" : "none",
+          boxShadow: scrolled || open ? "var(--neu-out)" : "none",
         }}
       >
         <a href="#top" className="group flex items-center gap-3" aria-label="Back to top">
@@ -100,7 +104,7 @@ export default function Navbar() {
         <ul className="hidden lg:flex relative items-center gap-1 text-sm font-semibold">
           <span
             aria-hidden="true"
-            className="absolute top-0 h-full clay-sm !rounded-full transition-all duration-500"
+            className="absolute top-0 h-full neu-in rounded-full transition-all duration-500"
             style={{
               left: pill.left,
               width: pill.width,
@@ -147,7 +151,7 @@ export default function Navbar() {
           <div className="px-1 pb-6">
             <ul
               className="flex flex-col gap-1 p-3 rounded-[26px] backdrop-blur-xl"
-              style={{ background: "var(--nav-bg)", boxShadow: "var(--clay-sm)" }}
+              style={{ background: "var(--nav-bg)", boxShadow: "var(--neu-out)" }}
             >
               {LINKS.map((l, i) => (
                 <li key={l.id} style={{ "--i": i }}>
@@ -156,7 +160,7 @@ export default function Navbar() {
                     tabIndex={open ? 0 : -1}
                     onClick={() => setOpen(false)}
                     className={`block px-4 py-3 rounded-2xl font-semibold transition-colors ${
-                      active === l.id ? "text-violet clay-in" : "text-muted hover:text-ink"
+                      active === l.id ? "text-violet neu-in" : "text-muted hover:text-ink"
                     }`}
                   >
                     {l.label}

@@ -82,14 +82,18 @@ export default function Hero() {
 
         {/* Portrait */}
         <Reveal variant="zoom" delay={250} className="order-first lg:order-last mx-auto">
-          <Tilt max={8} className="rounded-[42px]">
-            <div className="clay !rounded-[42px] p-3.5">
-              <div className="overflow-hidden rounded-[30px] w-60 sm:w-72 aspect-[4/5]">
-                <img
-                  src={profilePhoto}
-                  alt={NAME}
-                  className="w-full h-full object-cover object-top transition-transform duration-700 hover:scale-105"
-                />
+          {/* follows the pointer (mouse or finger) and glows around the edge */}
+          <Tilt max={8} shift={12} touch className="rounded-[42px]">
+            <div className="glow-frame">
+              <div className="clay !rounded-[42px] p-3.5">
+                <div className="overflow-hidden rounded-[30px] w-60 sm:w-72 aspect-[4/5]">
+                  <img
+                    src={profilePhoto}
+                    alt={NAME}
+                    draggable="false"
+                    className="w-full h-full object-cover object-top transition-transform duration-700 hover:scale-105"
+                  />
+                </div>
               </div>
             </div>
           </Tilt>

@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* lets the glowing photo border animate its gradient angle */
+@property --glow-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
@@ -61,6 +68,10 @@
     inset 6px 6px 12px rgba(158, 164, 200, 0.45),
     inset -6px -6px 12px rgba(255, 255, 255, 0.95);
   --nav-bg: rgba(238, 240, 248, 0.72);
+
+  /* neumorphism: same-colour surfaces lit from the top-left */
+  --neu-dark: rgba(163, 170, 204, 0.6);
+  --neu-light: rgba(255, 255, 255, 0.95);
   --orb-alpha: 16%;
 }
 
@@ -96,7 +107,19 @@
     inset 6px 6px 12px rgba(0, 0, 0, 0.42),
     inset -5px -5px 12px rgba(255, 255, 255, 0.05);
   --nav-bg: rgba(35, 39, 61, 0.72);
+
+  --neu-dark: rgba(8, 9, 20, 0.65);
+  --neu-light: rgba(60, 66, 102, 0.4);
   --orb-alpha: 22%;
+}
+
+/* Neumorphic shadow recipes, built from the per-theme --neu-dark/--neu-light */
+:root {
+  --neu-out-sm: 4px 4px 9px var(--neu-dark), -4px -4px 9px var(--neu-light);
+  --neu-out: 7px 7px 15px var(--neu-dark), -7px -7px 15px var(--neu-light);
+  --neu-out-lg: 11px 11px 22px var(--neu-dark), -11px -11px 22px var(--neu-light);
+  --neu-in-sm: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+  --neu-in: inset 5px 5px 10px var(--neu-dark), inset -5px -5px 10px var(--neu-light);
 }
 
 /* ------------------------------------------------------------------ */
@@ -173,9 +196,23 @@ h1, h2, h3, h4 {
   box-shadow: var(--clay-lift);
 }
 
+/*
+ * Neumorphism (soft UI) for controls: flat surface-coloured shapes that look
+ * pushed out of (raised) or pressed into (inset) the surface. Cards stay clay.
+ */
+.neu {
+  background: var(--surface);
+  box-shadow: var(--neu-out);
+}
+.neu-in {
+  background: var(--surface);
+  box-shadow: var(--neu-in);
+}
+
+/* small raised control surface (footer, back-to-top, ...) */
 .clay-sm {
-  background: linear-gradient(145deg, var(--surface-hi), var(--surface));
-  box-shadow: var(--clay-sm);
+  background: var(--surface);
+  box-shadow: var(--neu-out);
   border-radius: 16px;
 }
 
@@ -215,16 +252,18 @@ h1, h2, h3, h4 {
   font-weight: 600;
   color: var(--muted);
   border-radius: 999px;
-  background: linear-gradient(145deg, var(--surface-hi), var(--surface));
-  box-shadow: var(--clay-sm);
+  background: var(--surface);
+  box-shadow: var(--neu-out-sm);
   transition:
     transform 0.4s var(--ease-spring),
     color 0.3s,
     box-shadow 0.4s;
 }
+/* hovering presses the tag into the surface */
 .chip-hover:hover {
-  transform: translateY(-3px) scale(1.06);
+  transform: scale(0.97);
   color: var(--violet);
+  box-shadow: var(--neu-in-sm);
 }
 
 .eyebrow {
@@ -238,8 +277,8 @@ h1, h2, h3, h4 {
   text-transform: uppercase;
   color: var(--violet);
   border-radius: 999px;
-  background: linear-gradient(145deg, var(--surface-hi), var(--surface));
-  box-shadow: var(--clay-sm);
+  background: var(--bg);
+  box-shadow: var(--neu-out-sm);
 }
 
 /* Buttons --------------------------------------------------------------- */
@@ -313,16 +352,53 @@ h1, h2, h3, h4 {
   transform: translateX(120%);
 }
 
+/* Neumorphic secondary button: rises a little on hover, sinks in when pressed */
 .btn-soft {
   color: var(--ink);
-  background: linear-gradient(145deg, var(--surface-hi), var(--surface));
-  box-shadow: var(--clay-sm);
+  background: var(--surface);
+  box-shadow: var(--neu-out);
 }
 .btn-soft:hover {
+  transform: none;
   color: var(--violet);
+  box-shadow: var(--neu-out-lg);
 }
 .btn-soft:active {
-  box-shadow: var(--clay-in);
+  transform: scale(0.97);
+  box-shadow: var(--neu-in);
+}
+
+/* Neumorphic on/off switch (theme toggle) */
+.neu-switch {
+  position: relative;
+  width: 4.5rem;
+  height: 2.6rem;
+  padding: 0.3rem;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--neu-in);
+  cursor: pointer;
+}
+.neu-switch-knob {
+  position: absolute;
+  top: 0.3rem;
+  left: 0.3rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: var(--surface-hi);
+  box-shadow: var(--neu-out-sm);
+  transition:
+    translate 0.6s var(--ease-spring),
+    box-shadow 0.3s;
+}
+.neu-switch[aria-checked="true"] .neu-switch-knob {
+  translate: 1.9rem 0;
+}
+.neu-switch:hover .neu-switch-knob {
+  box-shadow: var(--neu-out);
 }
 
 /* Inputs ---------------------------------------------------------------- */
@@ -387,11 +463,16 @@ h1, h2, h3, h4 {
 
 .tilt {
   --lift: 0px;
-  transform: perspective(1000px) translateY(var(--lift)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform:
+    perspective(1000px)
+    translate3d(var(--tx, 0px), calc(var(--ty, 0px) + var(--lift)), 0)
+    rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg));
   transition: transform 0.6s var(--ease-out);
   will-change: transform;
 }
-.tilt:hover {
+/* .is-active is set by Tilt.jsx for mouse and touch alike (phones have no hover) */
+.tilt.is-active {
   --lift: -8px;
   transition-duration: 0.18s;
 }
@@ -405,11 +486,52 @@ h1, h2, h3, h4 {
   transition: opacity 0.4s;
   z-index: 2;
 }
-.tilt:hover .tilt-glare {
+.tilt.is-active .tilt-glare {
   opacity: 1;
 }
 :root[data-theme="dark"] .tilt-glare {
   background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.08), transparent 45%);
+}
+
+/* ------------------------------------------------------------------ */
+/* Glowing photo border: a rotating colour ring plus a soft halo       */
+/* ------------------------------------------------------------------ */
+
+.glow-frame {
+  position: relative;
+  isolation: isolate;
+  border-radius: 42px;
+}
+.glow-frame::before,
+.glow-frame::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  background: conic-gradient(from var(--glow-angle), var(--violet), var(--pink), var(--amber), var(--teal), var(--sky), var(--violet));
+  animation: glow-spin 6s linear infinite;
+  pointer-events: none;
+}
+/* crisp ring hugging the frame */
+.glow-frame::before {
+  inset: -3px;
+  z-index: -1;
+}
+/* blurred halo behind it */
+.glow-frame::after {
+  inset: -6px;
+  z-index: -2;
+  filter: blur(24px);
+  opacity: 0.8;
+  transition:
+    opacity 0.4s var(--ease-out),
+    filter 0.4s var(--ease-out);
+}
+.tilt.is-active .glow-frame::after {
+  opacity: 1;
+  filter: blur(32px);
+}
+@keyframes glow-spin {
+  to { --glow-angle: 360deg; }
 }
 
 /* ------------------------------------------------------------------ */
