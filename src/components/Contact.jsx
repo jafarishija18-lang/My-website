@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Send, Download, CalendarClock, Phone, Clock, Copy, Check, MessageCircle } from "lucide-react";
+import { Mail, Send, Download, CalendarClock, Phone, Clock, Copy, Check, MessageCircle, Loader2, AlertCircle } from "lucide-react";
 import { GithubIcon, LinkedinIcon, InstagramIcon } from "./icons";
 import { CONTACT, SCHEDULE_CALL_URL, RESUME_URL } from "../data";
 import Reveal from "./Reveal";
@@ -57,20 +57,36 @@ function InfoRow({ icon: Icon, tint, label, value, copy }) {
 }
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [sent, setSent] = useState(false);
+  const EMPTY = { name: "", email: "", subject: "", message: "", website: "" };
+  const [form, setForm] = useState(EMPTY);
+  // idle → sending → sent | error
+  const [status, setStatus] = useState({ state: "idle", error: "" });
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  // Sends through our server function (api/contact.js → Resend); the API key stays server-side.
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const body = `${form.message}\n\n— ${form.name} (${form.email})`;
-    window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(
-      form.subject || "Project inquiry"
-    )}&body=${encodeURIComponent(body)}`;
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
+    setStatus({ state: "sending", error: "" });
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not send your message.");
+      setForm(EMPTY);
+      setStatus({ state: "sent", error: "" });
+      setTimeout(() => setStatus((s) => (s.state === "sent" ? { state: "idle", error: "" } : s)), 6000);
+    } catch (err) {
+      setStatus({ state: "error", error: err.message || "Could not send your message." });
+    }
   };
+
+  const mailtoFallback = `mailto:${CONTACT.email}?subject=${encodeURIComponent(
+    form.subject || "Project inquiry"
+  )}&body=${encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`)}`;
 
   // Force a file download instead of opening the PDF in a browser viewer:
   // re-wrap it as a generic binary so no browser tries to display it.
@@ -141,7 +157,18 @@ export default function Contact() {
 
           <Reveal variant="card" delay={150} as="form" onSubmit={handleSubmit} className="clay p-6 sm:p-10">
             <h3 className="font-heading font-extrabold text-xl text-ink mb-2">Send a Message</h3>
-            <p className="text-muted text-sm mb-8">Fill this in and your email app will open with it ready to send.</p>
+            <p className="text-muted text-sm mb-8">Your message goes straight to my inbox, and I'll reply by email.</p>
+            {/* honeypot: hidden from people, tempting to spam bots */}
+            <input
+              type="text"
+              name="website"
+              value={form.website}
+              onChange={handleChange}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="absolute -left-[9999px] w-px h-px opacity-0"
+            />
             <div className="grid sm:grid-cols-2 gap-5 mb-5">
               <label className="block">
                 <span className="block text-sm font-bold text-muted mb-2 ml-1">Name</span>
@@ -190,18 +217,34 @@ export default function Contact() {
               />
             </label>
             <div className="flex flex-wrap items-center gap-5">
-              <button type="submit" className="btn btn-primary">
-                <Send size={17} className="btn-fly" /> Send Message
+              <button type="submit" className="btn btn-primary disabled:opacity-70" disabled={status.state === "sending"}>
+                {status.state === "sending" ? (
+                  <>
+                    <Loader2 size={17} className="animate-spin" /> Sending…
+                  </>
+                ) : (
+                  <>
+                    <Send size={17} className="btn-fly" /> Send Message
+                  </>
+                )}
               </button>
               <p
                 role="status"
-                className={`inline-flex items-center gap-2 text-sm font-semibold text-teal transition-all duration-500 ${
-                  sent ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-3"
-                }`}
+                className={`inline-flex items-center gap-2 text-sm font-semibold transition-all duration-500 ${
+                  status.state === "sent" || status.state === "error" ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-3"
+                } ${status.state === "error" ? "text-pink" : "text-teal"}`}
               >
-                {sent && (
+                {status.state === "sent" && (
                   <>
-                    <Check size={16} /> Opening your email app…
+                    <Check size={16} /> Thanks! Your message was sent.
+                  </>
+                )}
+                {status.state === "error" && (
+                  <>
+                    <AlertCircle size={16} /> {status.error}{" "}
+                    <a href={mailtoFallback} className="underline underline-offset-2">
+                      Email me instead
+                    </a>
                   </>
                 )}
               </p>
